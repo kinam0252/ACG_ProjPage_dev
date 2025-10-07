@@ -140,10 +140,54 @@
             Evaluated on RoboCasa, DexMimicGen, and real-world SO-101 tasks, ACG consistently improves action coherence and boosts success rates across diverse manipulation tasks.
           </p>
         </div>
+        
+        <!-- Thumbnail Video -->
+        <div class="content has-text-centered" style="margin-top: 2rem;">
+          <video class="autoplay-loop-video" src="assets/thumbnail.mp4" controls autoplay loop muted style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);"></video>
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  function enforceAutoplayLoop(video) {
+    // Play on load
+    if (video.paused) video.play();
+    // Always loop
+    video.addEventListener('ended', function() {
+      video.currentTime = 0;
+      video.play();
+    });
+    // Prevent seeking to pause only if not paused by user
+    video.addEventListener('seeking', function() {
+      if (!video.paused) video.play();
+    });
+  }
+
+  // 동영상 모두 동일하게 0초에서 시작
+  function syncAllVideos() {
+    const videos = document.querySelectorAll('video');
+    videos.forEach(v => {
+      try {
+        v.currentTime = 0;
+        v.play();
+      } catch (e) {}
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('video').forEach(enforceAutoplayLoop);
+    syncAllVideos();
+  });
+
+  // Observe for dynamically added/replaced videos
+  const observer = new MutationObserver(() => {
+    document.querySelectorAll('video').forEach(enforceAutoplayLoop);
+    syncAllVideos();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+</script>
 
 </body>
 </html>
