@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Temporal In-Context Fine-Tuning for Versatile Control of Video Diffusion Models">
+  <meta name="keywords" content="Video Diffusion Models, Temporal In-Context, Fine-Tuning, Video Control">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cartoon to Video Demo</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <!-- MathJax -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+
+  <style>
+    .media-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 16px;
+      max-width: 1200px;
+      margin: 20px auto 0 auto;
+      padding: 0 8px;
+      width: 100%;
+    }
+  
+    .media-cell {
+      flex: 1;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .media-cell img,
+    .media-cell video {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      image-rendering: auto;
+      border-radius: 0;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+  
+    /* 줄의 전체 너비는 유지하고, 한 줄에 있는 모든 셀은 균등 분배되게 */
+    .media-row.two-columns .media-cell {
+      width: calc((100% - 16px) / 2);
+    }
+  
+    .media-row.three-columns .media-cell {
+      width: calc((100% - 2 * 16px) / 3);
+    }
+  
+    /* 반응형 대응 */
+    @media screen and (max-width: 768px) {
+      .media-row {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .media-cell {
+        width: 100% !important;
+      }
+    }
+
+    /* Method section styling */
+    .method-section {
+      margin: 2rem 0;
+    }
+    .method-section h4 {
+      margin: 1.5rem 0 1rem 0;
+      color: #363636;
+    }
+    .method-section p {
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    .equation {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+    .equation-label {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #363636;
+    }
+  </style>  
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://junhahyung.github.io/">
+        <span class="icon">
+          <i class="fas fa-home"></i>
+        </span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            Temporal In-Context Fine-Tuning<br>for Versatile Control of Video Diffusion Models
+          </h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://kinam0252.github.io/" target="_blank" rel="noopener noreferrer">Kinam Kim*</a>,
+            </span>
+            <span class="author-block">
+              <a href="https://junhahyung.github.io/" target="_blank" rel="noopener noreferrer">Junha Hyung*</a>,
+            </span>
+            <span class="author-block">
+              <a href="https://sites.google.com/site/jaegulchoo/" target="_blank" rel="noopener noreferrer">Jaegul Choo</a>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">KAIST AI</span>
+          </div>
+
+          <div class="is-size-5 has-text-centered" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+            <b>NeurIPS 2025</b>
+          </div>
+          
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://github.com/kinam0252/TIC-FT"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2506.00996" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            We present <strong>Temporal In-Context Fine-Tuning (TIC-FT)</strong>, a simple and efficient method for adapting pretrained video diffusion models to a wide range of conditional generation tasks. TIC-FT works by concatenating condition and target frames along the temporal axis and inserting buffer frames with increasing noise, enabling smooth transitions and alignment with the model's temporal dynamics. Unlike prior approaches, TIC-FT requires no architectural changes or large datasets, and achieves strong performance with as few as 10–30 training samples. We demonstrate its effectiveness on tasks such as image-to-video and video-to-video generation using large-scale models, showing superior condition fidelity, visual quality, and efficiency compared to existing baselines.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="content has-text-justified" style="margin-bottom: 10px;">
+      <p style="color: #666; font-size: 0.95em;">
+        ※ All videos below are generated using Wan2.1-T2V-14B and CogVideoX-T2V-5B
+      </p>
+    </div>
+
+    <h2 class="title is-3" style="font-weight: bold; margin-top: 20px;">Image-To-Video</h2>
+    <div class="content has-text-justified" style="margin-bottom: 20px;">
+      <p>
+      This task generates a full video conditioned on a single image. The image may represent a high-level concept—such as a character profile or a top-view object—with the video depicting novel dynamics, such as a character-centric animation or a 360° rotation.
+      <br /><br />
+      <b>Note that our I2V generation is not limited to the first frame; instead, it leverages the identity of the first frame to enable diverse and coherent video synthesis.</b>
+</p>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/CartoonToVideo/1-1.png" alt="Cartoon Input 1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/CartoonToVideo/1-2.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/CartoonToVideo/2-1.png" alt="Cartoon Input 2">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/CartoonToVideo/2-2.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/3DToVideo/1-1.png" alt="3DToVideo 1-1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/3DToVideo/1-2.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/3DToVideo/2-1.png" alt="3DToVideo 2-1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/3DToVideo/2-2.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/CharacterToVideo/1-1.png" alt="CharacterToVideo 1-1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/CharacterToVideo/1-2.mp4" controls autoplay loop muted></video>
+      </div>
+      <div class="media-cell">
+        <img src="assets/CharacterToVideo/2-1.png" alt="CharacterToVideo 2-1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/CharacterToVideo/2-2.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/360/1-1.png" alt="360 1-1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/360/1-2.mp4" controls autoplay loop muted></video>
+      </div>
+      <div class="media-cell">
+        <img src="assets/360/2-1.png" alt="360 2-1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/360/2-2.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/NeRF/1-1.png" alt="NeRF 1-1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/NeRF/1-2.mp4" controls autoplay loop muted></video>
+      </div>
+      <div class="media-cell">
+        <img src="assets/NeRF/2-1.png" alt="NeRF 2-1">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/NeRF/2-2.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+
+    <h2 class="title is-3" style="font-weight: bold; margin-top: 60px;">Video Style Transfer</h2>
+    <div class="content has-text-justified" style="margin-bottom: 20px;">
+      <p>
+        This task transforms the visual style of a source video into that of a target domain (e.g., converting a realistic video into an animated version) while preserving motion and structure.
+      </p>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/V2VAnimate/1-1.mp4" controls autoplay loop muted></video>
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/V2VAnimate/1-2.mp4" controls autoplay loop muted></video>
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/V2VAnimate/2-1.mp4" controls autoplay loop muted></video>
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/V2VAnimate/2-2.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+
+    <h2 class="title is-3" style="font-weight: bold; margin-top: 60px;">Multiple Image Conditions</h2>
+    <div class="content has-text-justified" style="margin-bottom: 20px;">
+      <p>
+        This task generates a video based on two or more image conditions—such as a person and clothing, or a person and an object—capturing the combined semantics in motion.
+      </p>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/Advertise/1-1.png" alt="Advertise 1-1">
+      </div>
+      <div class="media-cell">
+        <img src="assets/Advertise/1-2.png" alt="Advertise 1-2">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/Advertise/1-3.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/Advertise/2-1.png" alt="Advertise 2-1">
+      </div>
+      <div class="media-cell">
+        <img src="assets/Advertise/2-2.png" alt="Advertise 2-2">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/Advertise/2-3.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/VITON/1-1.png" alt="VITON 1-1">
+      </div>
+      <div class="media-cell">
+        <img src="assets/VITON/1-2.png" alt="VITON 1-2">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/VITON/1-3.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/VITON/2-1.png" alt="VITON 2-1">
+      </div>
+      <div class="media-cell">
+        <img src="assets/VITON/2-2.png" alt="VITON 2-2">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/VITON/2-3.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+
+    <h2 class="title is-3" style="font-weight: bold; margin-top: 60px;">Keyframe Interpolation</h2>
+    <div class="content has-text-justified" style="margin-bottom: 20px;">
+      <p>
+        This task fills in intermediate frames between sparse keyframes to generate a smooth and temporally coherent video.
+      </p>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <img src="assets/INTERPOLATE/1-1.png" alt="INTERPOLATE 1-1">
+      </div>
+      <div class="media-cell">
+        <img src="assets/INTERPOLATE/1-2.png" alt="INTERPOLATE 1-2">
+      </div>
+      <div class="media-cell">
+        <img src="assets/INTERPOLATE/1-3.png" alt="INTERPOLATE 1-3">
+      </div>
+      <div class="media-cell">
+        <img src="assets/INTERPOLATE/1-4.png" alt="INTERPOLATE 1-4">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/INTERPOLATE/1-5.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+
+    <h2 class="title is-3" style="font-weight: bold; margin-top: 60px;">In-Context Action Transfer</h2>
+    <div class="content has-text-justified" style="margin-bottom: 20px;">
+      <p>
+        This task continues a novel scene by transferring the motion pattern of a reference action video into a new context, guided by the first frame of the new scene.
+      </p>
+    </div>
+    <div class="media-row">
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/SSv2/1-1.mp4" controls autoplay loop muted></video>
+      </div>
+      <div class="media-cell">
+        <img src="assets/SSv2/1-2.png" alt="SSv2 1-2">
+      </div>
+      <div class="media-cell">
+        <video class="autoplay-loop-video" src="assets/SSv2/1-3.mp4" controls autoplay loop muted></video>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="Method">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3">Method: Temporal In-Context Fine-Tuning (TIC-FT)</h2>
+    
+    <div class="method-section">
+      <p>
+        TIC-FT is a simple yet powerful approach for conditional video generation. The method's core innovation lies in its temporal concatenation strategy, which combines three key components:
+      </p>
+      <ul>
+        <li>Clean condition frames that provide the initial context</li>
+        <li>Buffer frames with gradually increasing noise levels</li>
+        <li>Pure noise target frames for generation</li>
+      </ul>
+      <p>
+        This carefully designed architecture ensures temporal coherence throughout the sequence while minimizing distribution mismatch during the fine-tuning process.
+      </p>
+    </div>
+
+    <h4><strong>Key Formulations</strong></h4>
+    
+    <div class="method-section">
+      <div class="equation">
+        <div class="equation-label">1. Temporal Concatenation</div>
+        <p>
+          The basic temporal concatenation combines condition frames with target frames:
+          \[
+          \mathbf{z}^{(t)} = [\bar{\mathbf{z}}^{(0)}_{1:L} \parallel \hat{\mathbf{z}}^{(t)}_{L+1:L+K}]
+          \]
+          where \(\bar{\mathbf{z}}^{(0)}\) represents clean condition frames and \(\hat{\mathbf{z}}^{(t)}\) represents noisy target frames.
+        </p>
+      </div>
+
+      <div class="equation">
+        <div class="equation-label">2. Buffer Frames</div>
+        <p>
+          Buffer frames are inserted with noise levels that gradually increase:
+          \[
+          \tilde{\tau}_b = \frac{b}{B+1} \cdot T \quad \text{for} \quad b = 1,\ldots,B
+          \]
+          The complete sequence with buffer frames is then:
+          \[
+          \mathbf{z}^{(T)} = [\bar{\mathbf{z}}^{(0)} \parallel \tilde{\mathbf{z}}^{(\tilde{\tau}_{1:B})} \parallel \hat{\mathbf{z}}^{(T)}]
+          \]
+          where \(\tilde{\mathbf{z}}^{(\tilde{\tau}_{1:B})}\) represents the buffer frames with interpolated noise levels.
+        </p>
+      </div>
+
+      <div class="equation">
+        <div class="equation-label">3. Loss Function</div>
+        <p>
+          The training loss is computed only on the target frames:
+          \[
+          \mathcal{L} = \frac{1}{K} \sum_{i=L+B+1}^{L+B+K} \|\boldsymbol{\epsilon}_i - \hat{\boldsymbol{\epsilon}}_i\|^2
+          \]
+          This formulation allows buffer frames to evolve naturally, creating a smooth transition between condition and target sequences.
+        </p>
+      </div>
+      <div class="equation">
+        <div class="equation-label">4. Inference</div>
+        <p>
+          At each global timestep \(t\), the model identifies frames with the current noise level and selectively denoises only those frames:
+          \[
+          \mathbf{T}(\mathbf{z}^{(T)}) = [0, \tilde{\tau}_1, \ldots, \tilde{\tau}_B, T, \ldots, T]
+          \]
+          \[
+          \mathbf{T}(\mathbf{z}^{(t)}) = [0, \tau_1(t), \ldots, \tau_B(t), t, \ldots, t]
+          \quad \text{where} \quad \tau_b(t) = \min(t, \tilde{\tau}_b)
+          \]
+          This step-wise denoising continues from \(t = T\) down to \(t = 0\), preserving the condition frames and ensuring a smooth noise transition across buffer and target frames.
+        </p>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+<section class="section" id="Evaluation">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3">Evaluation</h2>
+    
+    <div class="method-section">
+      <div class="media-row">
+        <div class="media-cell">
+          <img src="assets/evaluation/metric1.png" alt="I2V Evaluation Metrics">
+          <p class="has-text-centered" style="margin-top: 1rem; font-style: italic;">
+            Table 1: Comparison on VBench, GPT-4o, and perceptual similarity metrics for I2V tasks
+          </p>
+        </div>
+      </div>
+
+      <div class="media-row">
+        <div class="media-cell">
+          <img src="assets/evaluation/metric2.png" alt="V2V Evaluation Metrics">
+          <p class="has-text-centered" style="margin-top: 1rem; font-style: italic;">
+            Table 2: Comparison on VBench, GPT-4o, and perceptual similarity metrics for V2V tasks
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- 
+<section class="section" id="Denoising">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3">Denoising Visualization</h2>
+    <p>
+      Below is a visualization showing how the initial latent frames evolve through the denoising process.
+    </p>
+    <figure style="text-align: center; margin-top: 1.5rem;">
+      <img src="assets/Visualization/1.png" alt="Denoising Visualization" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    </figure>
+  </div>
+</section> -->
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>
+      @article{kim2025temporal,
+        title={Temporal In-Context Fine-Tuning for Versatile Control of Video Diffusion Models},
+        author={Kim, Kinam and Hyung, Junha and Choo, Jaegul},
+        journal={arXiv preprint arXiv:2506.00996},
+        year={2025}
+      }
+    </code></pre>
+  </div>
+</section>
+
+<script>
+  function enforceAutoplayLoop(video) {
+    // Play on load
+    if (video.paused) video.play();
+    // Always loop
+    video.addEventListener('ended', function() {
+      video.currentTime = 0;
+      video.play();
+    });
+    // Prevent seeking to pause only if not paused by user
+    video.addEventListener('seeking', function() {
+      if (!video.paused) video.play();
+    });
+  }
+
+  // 동영상 모두 동일하게 0초에서 시작
+  function syncAllVideos() {
+    const videos = document.querySelectorAll('video');
+    videos.forEach(v => {
+      try {
+        v.currentTime = 0;
+        v.play();
+      } catch (e) {}
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('video').forEach(enforceAutoplayLoop);
+    syncAllVideos();
+  });
+
+  // Observe for dynamically added/replaced videos
+  const observer = new MutationObserver(() => {
+    document.querySelectorAll('video').forEach(enforceAutoplayLoop);
+    syncAllVideos();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+</script>
+
+</body>
+</html>
